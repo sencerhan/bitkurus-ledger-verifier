@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "canonical_schema_version": 1,
+    "export_version": 2,
+    "state_hash": "f90f18217d92524bee55777cb1a08439f73c4a9ef96c853942fdad18a42a0e41",
+    "summary": {
+      "events": {
+        "total": 2
+      },
+      "tokens": {
+        "active": 1,
+        "active_supply": "1.000000000000000000",
+        "burned": 1,
+        "issued_supply": "1.000000000000000000",
+        "total": 2
+      },
+      "transactions": {
+        "committed": 1,
+        "fees_burned": "0.000000000000000000"
+      }
+    },
+    "total_supply_cap": "21000000.000000000000000000"
+  },
+  "ledger_events": [
+    {
+      "amount": "1.000000000000000000",
+      "event_type": "token_burned",
+      "token_id": "tok-in",
+      "tx_id": "tx-one"
+    },
+    {
+      "amount": "1.000000000000000000",
+      "event_type": "token_created",
+      "token_id": "tok-out",
+      "tx_id": "tx-one"
+    }
+  ],
+  "token_parents": [
+    {
+      "parent_token_id": "tok-in",
+      "token_id": "tok-out"
+    }
+  ],
+  "tokens": [
+    {
+      "owner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "burned",
+      "token_id": "tok-in",
+      "value": "1.000000000000000000",
+      "version": 2
+    },
+    {
+      "owner": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "status": "active",
+      "token_id": "tok-out",
+      "value": "1.000000000000000000",
+      "version": 1
+    }
+  ],
+  "transactions": [
+    {
+      "fee_amount": "0.000000000000000000",
+      "inputs": [
+        {
+          "token_id": "tok-in",
+          "version": 1
+        }
+      ],
+      "nonce": "n1",
+      "outputs": [
+        {
+          "owner": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "token_id": "tok-out",
+          "value": "1.000000000000000000"
+        }
+      ],
+      "payload": {
+        "tx_id": "tx-one",
+        "type": "transfer",
+        "sender": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "nonce": "n1",
+        "inputs": [
+          {
+            "token_id": "tok-in",
+            "version": 1
+          }
+        ],
+        "outputs": [
+          {
+            "owner": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "token_id": "tok-out",
+            "value": "1.000000000000000000"
+          }
+        ]
+      },
+      "sender": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "status": "committed",
+      "tx_id": "tx-one",
+      "type": "transfer"
+    }
+  ],
+  "canonical_hash": "0cd9847143b511cff1c8243a7e69ebc521559eaa6cb4ef0f37a85fcb2a5f10f5"
+}

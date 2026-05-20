@@ -1,0 +1,33 @@
+{
+  "name": "bitkurus-ledger-verifier",
+  "version": "1.0.0",
+  "description": "Fast standalone auditor for BitKuruş ledger exports and federation nodes",
+  "type": "module",
+  "bin": {
+    "bitkurus-verify": "./bin/bitkurus-verify.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "verify": "node bin/bitkurus-verify.js"
+  },
+  "keywords": [
+    "bitkurus",
+    "ledger",
+    "audit",
+    "utxo",
+    "ed25519",
+    "cryptocurrency"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sencerhan/bitkurus-ledger-verifier.git"
+  },
+  "homepage": "https://github.com/sencerhan/bitkurus-ledger-verifier#readme",
+  "bugs": {
+    "url": "https://github.com/sencerhan/bitkurus-ledger-verifier/issues"
+  }
+}
