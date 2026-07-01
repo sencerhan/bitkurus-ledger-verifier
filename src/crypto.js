@@ -28,7 +28,10 @@ export async function verifyEd25519Signature(signingPayload, signatureHex, publi
 
         const key = await subtle.importKey('raw', publicKey, { name: 'Ed25519' }, false, ['verify']);
 
-        return await subtle.verify({ name: 'Ed25519' }, signature, key, message);
+        // WebCrypto is verify(algorithm, key, signature, data) — the CryptoKey must
+        // be the 2nd argument. Passing (algo, signature, key, …) throws a TypeError
+        // that the catch below swallows, silently failing every signature check.
+        return await subtle.verify({ name: 'Ed25519' }, key, signature, message);
     } catch {
         return false;
     }

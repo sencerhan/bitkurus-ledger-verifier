@@ -1,10 +1,66 @@
 import {
+    canonicalJson,
     decimalToUnits,
     exportCanonicalHash,
     normalizeDecimal,
     stateHashFromTokens,
 } from './canonical.js';
 import { signingPayloadFromTransaction, verifyEd25519Signature } from './crypto.js';
+
+/**
+ * Compare two arrays as multisets of canonical JSON (order-independent).
+ * @param {unknown[]} a
+ * @param {unknown[]} b
+ */
+function sameMultiset(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+        return false;
+    }
+
+    const key = (x) => canonicalJson(x);
+    const left = a.map(key).sort();
+    const right = b.map(key).sort();
+
+    return left.every((v, i) => v === right[i]);
+}
+
+/**
+ * The bytes that were actually signed live in tx.payload, which preserves the
+ * original input/output element order. The top-level tx.inputs/outputs arrays
+ * are re-sorted in the export, so reconstructing the payload from them yields
+ * different canonical bytes and breaks verification for multi-input merges.
+ *
+ * Using tx.payload directly is only safe if it describes the same effect the
+ * ledger applied — otherwise a signed-but-unrelated payload could pass. So we
+ * also assert payload identity fields and input/output multisets match the
+ * top-level transaction before trusting it.
+ *
+ * @returns {{ payload: object } | { mismatch: true } | null}
+ */
+function signedPayloadForTransaction(tx) {
+    const reconstructed = signingPayloadFromTransaction(tx);
+
+    if (!tx.payload || typeof tx.payload !== 'object') {
+        return { payload: reconstructed };
+    }
+
+    const p = tx.payload;
+    const scalarsMatch =
+        p.tx_id === reconstructed.tx_id &&
+        p.type === reconstructed.type &&
+        p.sender === reconstructed.sender &&
+        p.nonce === reconstructed.nonce;
+
+    const setsMatch =
+        sameMultiset(p.inputs ?? [], reconstructed.inputs) &&
+        sameMultiset(p.outputs ?? [], reconstructed.outputs);
+
+    if (!scalarsMatch || !setsMatch) {
+        return { mismatch: true };
+    }
+
+    return { payload: p };
+}
 
 /**
  * @typedef {object} AuditIssue
@@ -154,17 +210,32 @@ export async function auditLedgerExport(doc, opts = {}) {
             });
         }
 
-        if (!skipSignatures) {
-            const payload = signingPayloadFromTransaction(tx);
-            const ok = await verifyEd25519Signature(payload, tx.signature, tx.sender);
+        // System-minted transactions (validator commission / issuance) are not
+        // Ed25519-signed by a wallet — they carry signature "system" and are
+        // constrained by the issuance/conservation rules instead.
+        const isSystemTx = tx.signature === 'system' || tx.type === 'issuance';
 
-            if (!ok) {
+        if (!skipSignatures && !isSystemTx) {
+            const signed = signedPayloadForTransaction(tx);
+
+            if (signed?.mismatch) {
                 issues.push({
                     level: 'error',
-                    code: 'invalid_signature',
-                    message: 'Ed25519 signature does not verify over canonical signing payload',
+                    code: 'payload_mismatch',
+                    message: 'tx.payload does not match top-level inputs/outputs/identity',
                     tx_id: txId,
                 });
+            } else {
+                const ok = await verifyEd25519Signature(signed.payload, tx.signature, tx.sender);
+
+                if (!ok) {
+                    issues.push({
+                        level: 'error',
+                        code: 'invalid_signature',
+                        message: 'Ed25519 signature does not verify over canonical signing payload',
+                        tx_id: txId,
+                    });
+                }
             }
         }
     }
